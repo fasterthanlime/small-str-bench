@@ -8,7 +8,7 @@ use smol_str::SmolStr;
 use std::time::Duration;
 
 const FAST_AND_INACCURATE: bool = false;
-const SIZES: &[usize] = &[5, 10, 20, 200, 600, 1800, 3500];
+const SIZES: &[usize] = &[2, 5, 11, 20, 100, 200, 700, 1900, 3400];
 
 trait SizeGroup {
     fn size_group<F: Fn(&mut BenchmarkGroup<WallTime>, usize)>(&mut self, name: &str, f: F);
