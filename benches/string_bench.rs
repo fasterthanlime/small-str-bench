@@ -1,14 +1,15 @@
 use criterion::{
     criterion_group, criterion_main,
     measurement::{Measurement, WallTime},
-    BatchSize, BenchmarkGroup, BenchmarkId, Criterion,
+    AxisScale, BatchSize, BenchmarkGroup, BenchmarkId, Criterion, PlotConfiguration,
 };
 use smartstring::{LazyCompact, SmartString};
 use smol_str::SmolStr;
 use std::time::Duration;
 
 const FAST_AND_INACCURATE: bool = false;
-const SIZES: &[usize] = &[2, 5, 11, 20, 100, 200, 700, 1900, 3400];
+const FAST_SIZES: &[usize] = &[10, 100, 1000];
+const GOOD_SIZES: &[usize] = &[1, 5, 10, 50, 100, 500, 1000, 5000, 10_000, 50_000];
 
 trait SizeGroup {
     fn size_group<F: Fn(&mut BenchmarkGroup<WallTime>, usize)>(&mut self, name: &str, f: F);
@@ -16,13 +17,21 @@ trait SizeGroup {
 
 impl SizeGroup for Criterion {
     fn size_group<F: Fn(&mut BenchmarkGroup<WallTime>, usize)>(&mut self, name: &str, f: F) {
+        let plot_config = PlotConfiguration::default().summary_scale(AxisScale::Logarithmic);
+
         let mut group = self.benchmark_group(name);
+        group.plot_config(plot_config);
         if FAST_AND_INACCURATE {
             group.measurement_time(Duration::from_millis(800));
             group.warm_up_time(Duration::from_millis(200));
         }
 
-        for &n in SIZES {
+        let sizes = if FAST_AND_INACCURATE {
+            FAST_SIZES
+        } else {
+            GOOD_SIZES
+        };
+        for &n in sizes {
             f(&mut group, n)
         }
     }
